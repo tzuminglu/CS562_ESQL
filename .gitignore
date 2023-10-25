@@ -1,6 +1,10 @@
 database.ini
-.env
-.vscode
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 .env
 /__pycache__
