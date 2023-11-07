@@ -1,11 +1,17 @@
-def mf_Structure(S,F,table):
+def mf_Structure(S,F,G,table):
     mf_structure={}
     for name in S:
-        type = getType(name,table);
+        type = getType(name,table)
         mf_structure[name]=[type,[]]
     for name in F:
-        type = getType(name,table);
+        type = getType(name,table)
         mf_structure[name]=[type,[]]
+    if (G) and (G[0]):
+        array=G[0].split()
+        for name in array:
+            if "." in name or "_" in name:
+                type = getType(name,table)
+                mf_structure[name]=[type,[]]
     return mf_structure
 def getType(name,table):
     map = { 
