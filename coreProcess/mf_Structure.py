@@ -28,6 +28,6 @@ def getType(name,table):
             return "float"
         else:
             type=array[2]
-    return table[type][1]
+    return map[table[type][1]]
 
     
