@@ -8,6 +8,13 @@ def processAgg(F):
             aggregate[key] = []
         aggregate[key].append((f,array[1], array[2]))
     return aggregate
+# convert SELECT CONDITION-VECT statment into conditions that can dirctly usued in aggreate process function
+# ex
+# GROUPING ATTRIBUTES(V):
+# cust, prod
+# SELECT CONDITION-VECT([]):
+# change 1.cust == cust and 1.prod == prod and 1.quant == 0_max_quant
+# into: group[cust,prod]==cust and group[cust,prod]==prod and group[cust,prod][0_max_quant] == quant
 def processSuchthat(conditions,groupby_attributes):
     processed = []
     array = conditions.split("and")
@@ -27,7 +34,8 @@ def processSuchthat(conditions,groupby_attributes):
         else:
             right ='group['+groupby_attributes+']["'+right+'"]'
             processed.append(left+operator+right)
-    return processed
+    statement = ' and '.join(processed)
+    return statement
 def processHaving(havings):
     processed = []
     array = havings.split("and")
