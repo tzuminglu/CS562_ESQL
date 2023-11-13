@@ -46,7 +46,7 @@ def processHaving(havings):
         processed.append(L_string+operator+R_string)
     return processed
 def processAttr1(S, C, G):
-    attr = {}
+    attrs = {}
     operators = ["==", "<=", ">=", "<", ">", "!="]
     group_variable_attrs = {}
     group_variable_attrs_max_aggregate = {}
@@ -56,9 +56,9 @@ def processAttr1(S, C, G):
         if "." in s:
             splited = s.split(".")
             number = int(splited[0])
-            if number not in attr:
-                attr[number] = []
-            attr[number].append(splited[1])
+            if number not in attrs:
+                attrs[number] = []
+            attrs[number].append(splited[1])
     
     for c in C:
         array = c.split(" and ")
@@ -69,7 +69,7 @@ def processAttr1(S, C, G):
                 number = int(statement[0].split(".")[0])
                 right = statement[1]
                 if "max" in right or "min" in right:
-                    group_variable_attrs[number] = attr.get(number, [])
+                    group_variable_attrs[number] = attrs.get(number, [])
     
     for g in G:
         array = g.split(" and ")
@@ -81,11 +81,11 @@ def processAttr1(S, C, G):
                     number = int(statement[0].split(".")[0])
                     right = statement[1]
                     if "max" in right:
-                        group_variable_attrs_max_aggregate[number] = attr.get(number, [])
-                        group_variable_attrs[number] = attr.get(number, [])
+                        group_variable_attrs_max_aggregate[number] = attrs.get(number, [])
+                        group_variable_attrs[number] = attrs.get(number, [])
                     if "min" in right:
-                        group_variable_attrs_min_aggregate[number] = attr.get(number, [])
-                        group_variable_attrs[number] = attr.get(number, [])
+                        group_variable_attrs_min_aggregate[number] = attrs.get(number, [])
+                        group_variable_attrs[number] = attrs.get(number, [])
     
     return group_variable_attrs, group_variable_attrs_max_aggregate, group_variable_attrs_min_aggregate
 
