@@ -1,4 +1,5 @@
 import collections
+import re
 def processAgg(F):
     aggregate={}
     for f in F:
@@ -29,7 +30,7 @@ def processSuchthat(conditions,groupby_attributes):
         if "date" in left:
             right ='date.fromisoformat("'+right+'")'
             processed.append(left+operator+right)
-        elif "'" in right or right.isdigit():
+        elif '"' in right or right.isdigit():
             processed.append(left+operator+right)
         else:
             right ='group['+groupby_attributes+']["'+right+'"]'
@@ -38,21 +39,33 @@ def processSuchthat(conditions,groupby_attributes):
     return statement
 def processHaving(havings):
     processed = []
-    array = havings.split("and")
+    array = re.split('(and|or)', havings)
     operators = ["==", "<=", ">=", "<", ">", "!="]
+
     for having in array:
+        # Skip if the element is 'and' or 'or'
+        if having in ['and', 'or']:
+            processed.append(having)
+            continue
+
+        # Identify and split by the operator in the expression
         operator = next((op for op in operators if op in having), "!=")
-        splited = having.split(operator)
-        left = splited[0].split()
-        right = splited[1].split()
+        splited = re.split('({})'.format(operator), having)
+        left, right = splited[0].split(), splited[2].split()
+        # Replace elements in left and right
         left = ['val["'+l+'"]' if "." in l or "_" in l else l for l in left]
         right = ['val["'+r+'"]' if "." in r or "_" in r else r for r in right]
-        L_string = ' '.join(left)
-        R_string = ' '.join(right)
-        L_string=L_string.strip()
-        R_string=R_string.strip()
-        processed.append(L_string+operator+R_string)
-    return processed
+
+        # Join the lists back into strings
+        L_string, R_string = ' '.join(left).strip(), ' '.join(right).strip()
+
+        # Reconstruct the expression with the operator
+        processed_expression = L_string + operator + R_string
+        processed.append(processed_expression)
+
+    # Join the processed expressions with their original logical operators
+    statement = ' '.join(processed)
+    return statement
 def processAttr1(S, C, G):
     attrs = {}
     operators = ["==", "<=", ">=", "<", ">", "!="]
