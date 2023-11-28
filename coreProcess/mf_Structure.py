@@ -27,7 +27,7 @@ def getType(name):
     'state': "str",
     "date":"date"
     }
-    type=""
+    type=name
     # normal case like 1.cust, using split to get cust
     if "."in name:
         type=name.split(".")[1]
@@ -40,6 +40,6 @@ def getType(name):
             return "float"
         else:
             type=array[2]
-    return map[type]
-
+    # return what the mapping type
+    return map.get(type)
     
