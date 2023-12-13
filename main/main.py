@@ -25,17 +25,14 @@ def connect():
     file = None
     with open(r"C:\Users\asd19\Desktop\CS562_ESQL\main\query_input1.txt") as my_file:
         file = my_file.read()
-    operands=input_parser(file)
-    schema = processSchema(table_name,cursor)
-    if not operands:
-        print("Input values are not valid")
-    else:
-        S = operands["SELECT ATTRIBUTE(S):"]
-        N = operands["NUMBER OF GROUPING VARIABLES(n):"]
-        V = operands["GROUPING ATTRIBUTES(V):"]
-        F = operands["F-VECT([F]):"]
-        C = operands["SELECT CONDITION-VECT([]):"]
-        G = operands["HAVING_CONDITION(G):"]
+    input=input_parser(file)
+    schema = {'cust': '0','prod': '1','day': '2','month': '3','year':'4','state': '5','quant': '6',"date":'7'}
+    S = input["SELECT ATTRIBUTE(S):"]
+    N = input["NUMBER OF GROUPING VARIABLES(n):"]
+    V = input["GROUPING ATTRIBUTES(V):"]
+    F = input["F-VECT([F]):"]
+    C = input["SELECT CONDITION-VECT([]):"]
+    G = input["HAVING_CONDITION(G):"]
     mf= mf_structure(S, F, G)
     script += writeQueryTable(table_name,space)
     script += writeMFStructure(mf,space)
