@@ -32,8 +32,8 @@ def input_parser(file):
     return function_dict
 
 
-file = None
-with open("../Test Data/query_input1.txt") as my_file:
-    file = my_file.read()
-print(file)
-print(input_parser(file))
+# file = None
+# with open("../Test Text/query_input1.txt") as my_file:
+#     file = my_file.read()
+# print(file)
+# print(input_parser(file))
