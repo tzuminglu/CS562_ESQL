@@ -1,31 +1,33 @@
-def mf_Structure(S,F,G,table):
+def mf_Structure(S,F,G):
     mf_structure={}
     for s in S:
-        type = getType(s,table)
+        type = getType(s)
         if s not in mf_structure:
             mf_structure[s]=[type,[]]
     for f in F:
-        type = getType(f,table)
+        type = getType(f)
         if f not in mf_structure:
             mf_structure[f]=[type,[]]
     if (G) and (G[0]):
         array=G[0].split()
         for name in array:
             if "." in name or "_" in name:
-                type = getType(name,table)
+                type = getType(name)
                 if s not in mf_structure:
                     mf_structure[name]=[type,[]]
     return mf_structure
-
-def getType(name,table):
+def getType(name):
     map = { 
-    'character': "str",
-    'character varying': "str",
-    'integer': "int",
-    'date': "date",
-    'float': "float",
+    'cust': "str",
+    'prod': "str",
+    'day': "int",
+    'month': "int",
+    'year': "int",
+    'quant': "int",
+    'state': "str",
+    "date":"date"
     }
-    type=""
+    type=name
     # normal case like 1.cust, using split to get cust
     if "."in name:
         type=name.split(".")[1]
@@ -38,6 +40,6 @@ def getType(name,table):
             return "float"
         else:
             type=array[2]
-    return map[table[type][1]]
-
+    # return what the mapping type
+    return map.get(type)
     
