@@ -1,0 +1,14 @@
+import psycopg2
+import collections
+from datetime import date, datetime
+import string
+from prettytable import PrettyTable
+
+def query():
+    conn = psycopg2.connect(
+        host="localhost",
+        database="postgres",
+        user="postgres",
+        password="xxxxxx" #need to change the variable name
+    )
+    cursor = conn.cursor()

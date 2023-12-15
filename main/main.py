@@ -11,7 +11,7 @@ from OutputProcess.outputProcess import * # might need to chang the variable nam
 template_path = str(pathlib.Path(__file__).parent.resolve())
 def connect():
     space = 4
-    template = open(template_path + '/Template/template_header.txt',mode='r')
+    template = open(template_path + '/Template/header.txt',mode='r')
     script = template.read() + "\n"
     template.close()
     table_name = "sales"
@@ -46,7 +46,7 @@ def connect():
     #
     #----------------------
     script = writeProject(S, G, schema, script, space)
-    template_footer = open(template_path + '/Template/template_footer.txt',mode='r')
+    template_footer = open(template_path + '/Template/footer.txt',mode='r')
     script += template_footer.read() + "\n"
     template.close()
     file = open('query.py',mode='w')
