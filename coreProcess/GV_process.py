@@ -37,6 +37,8 @@ def processSuchthat(conditions, groupby_attributes):
             processed.append(left+operator+right)
         elif '"' in right or right.isdigit():
             processed.append(left+operator+right)
+        elif "'" in right or right.isdigit():
+            processed.append(left+operator+right)
         else:
             right = 'group['+groupby_attributes+']["'+right+'"]'
             processed.append(left+operator+right)
@@ -122,36 +124,7 @@ def processAttr1(S, C, G):
     return group_variable_attrs, group_variable_attrs_max_aggregate, group_variable_attrs_min_aggregate
 
 
-sys.path.append('../')
-import InputProcess.InputParser as InputParser
-# import OutputProcess.OutputProcessor as OutputParser
-
-file = None
-with open(r"/Users/ming/Desktop/CS562/CS562_ESQL/Test Text/query_input1.txt") as my_file:
-    file = my_file.read()
-operands = InputParser.input_parser(file)
-if not operands:
-    print("Input values are not valid")
-else:
-    S = operands["SELECT ATTRIBUTE(S):"]
-    N = operands["NUMBER OF GROUPING VARIABLES(n):"]
-    V = operands["GROUPING ATTRIBUTES(V):"]
-    F = operands["F-VECT([F]):"]
-    C = operands["SELECT CONDITION-VECT([σ]):"]
-    G = operands["HAVING_CONDITION(G):"]
-mf = processAgg(F)
-print(mf)
-print(f"S: {S}\n")
-print(f"N: {N}\n")
-print(f"V: {V}\n")
-print(f"F: {F}\n")
-print(f"C: {C}\n")
-print(f"G: {G}\n")
 # print(f"{processAgg(F)}\n")
-
-statement = processSuchthat("1.cust == cust and 1.prod == prod and 1.quant == 0_max_quant", "cust, prod")
-print(f"statement: {statement}\n")
-print(f"attributes: {processAttr1(S, C, G)}\n")
 # print(OutputParser.GVScan(S, V, C, G,  
 #                           {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': ['3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
 #                           None,
