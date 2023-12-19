@@ -1,9 +1,13 @@
 def avgStructure(attrs, func, group_variable, indentation, condition):
     
     avg = ""
+    target=func
+    if '_' in func:
+        target=func.split('_')[2]
     group_key = f"group[{attrs}]['{func}']"
     # group_key = "group[" + group_variable + ']["'  + func[0] + '"]'
-    count_key = "count_" + group_variable + "_" + func + "[" + attrs + "]"
+    count_key = "count_"  + func + "[" + attrs + "]"
+    print(f"count_key: {count_key}")
 
     if condition:
         avg += f'{" " * indentation}if {condition}:\n'
@@ -11,14 +15,14 @@ def avgStructure(attrs, func, group_variable, indentation, condition):
 
     avg += ((" " * indentation) + "if not " + group_key + ":\n")
     indentation += 2
-    avg += ((" " * indentation) + group_key + " = " + func  + "\n")
+    avg += ((" " * indentation) + group_key + " = " + target  + "\n")
     avg += ((" " * indentation) + count_key + " += 1\n")
     indentation -= 2 
 
     avg += ((" " * indentation) + "else:\n")
     indentation += 2
     avg += ((" " * indentation) + count_key + " += 1\n")
-    avg += ((" " * indentation) + group_key + " += ((" + func  + " - " + group_key + ")/" + count_key + ")\n")
+    avg += ((" " * indentation) + group_key + " += ((" + target  + " - " + group_key + ")/" + count_key + ")\n")
 
     return avg
 # print(avgStructure("(key_cust)",
@@ -29,14 +33,16 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, indenta
 
     structure = ""
     group_key = f'group[{attrs}]["{func}"]'
-
+    target=func
+    if '_' in func:
+        target=func.split('_')[2]
     if condition:
         structure += (" " * indentation) + f'if {condition}:\n'
         indentation += 2
 
     structure += (" " * indentation) + f'if not {group_key}:\n'
     indentation += 2
-    structure += (" " * indentation) + f'{group_key} = {func}\n'
+    structure += (" " * indentation) + f'{group_key} = {target}\n'
 
     if group_variable_attrs_max_aggregate:
         for attr in group_variable_attrs_max_aggregate:
@@ -51,9 +57,9 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, indenta
     indentation -= 2
     structure += (" " * indentation) + "else:\n"
     indentation += 2
-    structure += (" " * indentation) + f'if {func} > {group_key}:\n'
+    structure += (" " * indentation) + f'if {target} > {group_key}:\n'
     indentation += 2
-    structure += (" " * indentation) + f'{group_key} = {func}\n'
+    structure += (" " * indentation) + f'{group_key} = {target}\n'
 
     if group_variable_attrs_max_aggregate:
         for attr in group_variable_attrs_max_aggregate:
@@ -72,14 +78,16 @@ def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, indenta
     structure = ""
     group_key = f'group[{attrs}]["{func}"]'
     print(f"group_variable_attrs_min_aggregate:{group_variable_attrs_min_aggregate}")
-
+    target=func
+    if '_' in func:
+        target=func.split('_')[2]
     if condition:
         structure += (" " * indentation) + f'if {condition}:\n'
         indentation += 2
 
     structure += (" " * indentation) + f'if not {group_key}:\n'
     indentation += 2
-    structure += (" " * indentation) + f'{group_key} = {func}\n'
+    structure += (" " * indentation) + f'{group_key} = {target}\n'
 
     if group_variable_attrs_min_aggregate:
         for attr in group_variable_attrs_min_aggregate:
@@ -94,9 +102,9 @@ def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, indenta
     indentation -= 2
     structure += (" " * indentation) + "else:\n"
     indentation += 2
-    structure += (" " * indentation) + f'if {func} < {group_key}:\n'
+    structure += (" " * indentation) + f'if {target} < {group_key}:\n'
     indentation += 2
-    structure += (" " * indentation) + f'{group_key} = {func}\n'
+    structure += (" " * indentation) + f'{group_key} = {target}\n'
 
     if group_variable_attrs_min_aggregate:
         for attr in group_variable_attrs_min_aggregate:
@@ -116,7 +124,9 @@ def countStructure(attrs, func, indentation, condition):
 
     structure = ""
     group_key = f'group[{attrs}]["{func}"]'
-
+    target=func
+    if '_' in func:
+        target=func.split('_')[2]
     if condition:
         structure += (" " * indentation) + f'if {condition}:\n'
         indentation += 2
@@ -137,18 +147,20 @@ def sumStructure(attrs, func, indentation, condition):
 
     structure = ""
     group_key = f"group[{attrs}]['{func}']"
-
+    target=func
+    if '_' in func:
+        target=func.split('_')[2]
     if condition:
         structure += (" " * indentation) + f"if {condition}:\n"
         indentation += 2
 
     structure += (" " * indentation) + f"if not {group_key}:\n"
     indentation += 2
-    structure += (" " * indentation) + f"{group_key} = {func}\n"
+    structure += (" " * indentation) + f"{group_key} = {target}\n"
     indentation -= 2
     structure += (" " * indentation) + "else:\n"
     indentation += 2
-    structure += (" " * indentation) + f"{group_key} += {func}\n"
+    structure += (" " * indentation) + f"{group_key} += {target}\n"
 
     return structure
 

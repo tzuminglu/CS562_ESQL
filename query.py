@@ -17,17 +17,25 @@ def query():
     query = 'select * from sales'
     cursor.execute(query)
     rows = cursor.fetchall()
-    mf_structure = {'cust': [], '1_avg_quant': [], '2_avg_quant': [], '3_avg_quant': []}
+    mf_structure = {'cust': [], '0_avg_quant': [], '1_avg_quant': [], '2_avg_quant': [], '3_count_quant': []}
     group = collections.defaultdict(lambda: dict(mf_structure))
 
     ## 1th Scan:
+    count_0_avg_quant= collections.defaultdict(int)
     for row in rows:
       key_cust = row[0]
+      quant = row[6]
       if not (group[(key_cust)]["cust"]):
         group[(key_cust)]["cust"] = key_cust
+      if not group[(key_cust)]['0_avg_quant']:
+        group[(key_cust)]['0_avg_quant'] = quant
+        count_0_avg_quant[(key_cust)] += 1
+      else:
+        count_0_avg_quant[(key_cust)] += 1
+        group[(key_cust)]['0_avg_quant'] += ((quant - group[(key_cust)]['0_avg_quant'])/count_0_avg_quant[(key_cust)])
 
     ## GV Scan:
-    count_1_quant = collections.defaultdict(int)
+    count_1_avg_quant = collections.defaultdict(int)
     for (key_cust) in group:
       for row in rows:
         cust = row[0]
@@ -38,15 +46,15 @@ def query():
         state = row[5]
         quant = row[6]
         date = row[7]
-        if cust==group[(key_cust)]["cust"] and state=="NY":
+        if cust==group[(key_cust)]["cust"] and quant>group[(key_cust)]["0_avg_quant"]:
           if not group[(key_cust)]['1_avg_quant']:
-            group[(key_cust)]['1_avg_quant'] = 1_avg_quant
-            count_1_1_avg_quant[(key_cust)] += 1
+            group[(key_cust)]['1_avg_quant'] = quant
+            count_1_avg_quant[(key_cust)] += 1
           else:
-            count_1_1_avg_quant[(key_cust)] += 1
-            group[(key_cust)]['1_avg_quant'] += ((1_avg_quant - group[(key_cust)]['1_avg_quant'])/count_1_1_avg_quant[(key_cust)])
+            count_1_avg_quant[(key_cust)] += 1
+            group[(key_cust)]['1_avg_quant'] += ((quant - group[(key_cust)]['1_avg_quant'])/count_1_avg_quant[(key_cust)])
 
-    count_2_quant = collections.defaultdict(int)
+    count_2_avg_quant = collections.defaultdict(int)
     for (key_cust) in group:
       for row in rows:
         cust = row[0]
@@ -57,15 +65,14 @@ def query():
         state = row[5]
         quant = row[6]
         date = row[7]
-        if cust==group[(key_cust)]["cust"] and state=="NJ":
+        if cust==group[(key_cust)]["cust"] and quant>group[(key_cust)]["0_avg_quant"] and state=="NY":
           if not group[(key_cust)]['2_avg_quant']:
-            group[(key_cust)]['2_avg_quant'] = 2_avg_quant
-            count_2_2_avg_quant[(key_cust)] += 1
+            group[(key_cust)]['2_avg_quant'] = quant
+            count_2_avg_quant[(key_cust)] += 1
           else:
-            count_2_2_avg_quant[(key_cust)] += 1
-            group[(key_cust)]['2_avg_quant'] += ((2_avg_quant - group[(key_cust)]['2_avg_quant'])/count_2_2_avg_quant[(key_cust)])
+            count_2_avg_quant[(key_cust)] += 1
+            group[(key_cust)]['2_avg_quant'] += ((quant - group[(key_cust)]['2_avg_quant'])/count_2_avg_quant[(key_cust)])
 
-    count_3_quant = collections.defaultdict(int)
     for (key_cust) in group:
       for row in rows:
         cust = row[0]
@@ -76,23 +83,22 @@ def query():
         state = row[5]
         quant = row[6]
         date = row[7]
-        if cust==group[(key_cust)]["cust"] and state=="CT":
-          if not group[(key_cust)]['3_avg_quant']:
-            group[(key_cust)]['3_avg_quant'] = 3_avg_quant
-            count_3_3_avg_quant[(key_cust)] += 1
+        if cust==group[(key_cust)]["cust"] and state=="NY" and quant>group[(key_cust)]["1_avg_quant"]:
+          if not group[(key_cust)]["3_count_quant"]:
+            group[(key_cust)]["3_count_quant"] = 1
           else:
-            count_3_3_avg_quant[(key_cust)] += 1
-            group[(key_cust)]['3_avg_quant'] += ((3_avg_quant - group[(key_cust)]['3_avg_quant'])/count_3_3_avg_quant[(key_cust)])
+            group[(key_cust)]["3_count_quant"] += 1
 
     x = PrettyTable()
-    x.field_names = ['cust','1_avg_quant','2_avg_quant','3_avg_quant']
+    x.field_names = ['cust','0_avg_quant','1_avg_quant','2_avg_quant','3_count_quant']
     for val in group.values():
-      row_str=''
-      for key in val:
-        if key in x.field_names:
-          row_str+=str(val[key])+','
-      row_str = row_str[:-1]
-      x.add_row(row_str.split(','))
+      if val["3_count_quant"]>65:
+        row_str=''
+        for key in val:
+          if key in x.field_names:
+            row_str+=str(val[key])+','
+        row_str = row_str[:-1]
+        x.add_row(row_str.split(','))
     print(x)
 if __name__ == "__main__":
   query()

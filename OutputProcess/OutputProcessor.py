@@ -39,8 +39,8 @@ def firstScan(V, schema, structure, indentation, group_variable_fs):
         gv0 = [(f[0], f[1], f[2])for f in group_variable_fs[0]]
         for f in gv0:
             if "avg" in f[1]:
-                structure += ((" " * indentation) + "count_0_" +
-                              f[2] + "= collections.defaultdict(int)\n")
+                structure += ((" " * indentation) + "count_" +
+                              f[0] + "= collections.defaultdict(int)\n")
                 break
     structure += ((" " * indentation) + "for row in rows:\n")
     indentation += 2
@@ -68,7 +68,6 @@ def firstScan(V, schema, structure, indentation, group_variable_fs):
     indentation -= 2
 
     if 0 in group_variable_fs.keys():
-        group_variables_to_be_scan = { 0 : [f[0]]}
         for f in gv0:
             print("this is f")
             print(f)
@@ -126,7 +125,7 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
         print(f'\n{value}')
         if "avg" in value[1]:
             structure += (" " * indentation) + \
-                f"count_{index}_{value[2]} = collections.defaultdict(int)\n"
+                f"count_{value[0]} = collections.defaultdict(int)\n"
         print(structure)
     structure += (" " * indentation) + f"for {group_attr} in group:\n"
     indentation += 2
@@ -182,20 +181,20 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
     return structure
 
 
-print(GVScan(['cust', '1_count_quant', '2_count_quant', '3_count_quant', '4_count_quant'],
-             ['cust'],
-             ['1.cust == cust and 1.quant > 0_avg_quant', '2.cust == cust and 2.quant > 1_avg_quant',
-                 '3.cust == cust and 3.quant > 2_avg_quant', '4.cust == cust and 4.quant > 3_avg_quant'],
-             [''],
-             {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
-                 '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
-             None,
-             None,
-             "",
-             2,
-             [('1_avg_quant', 'avg', 'quant'), ('1_count_quant', 'count', 'quant')],
-             1
-))
+# print(GVScan(['cust', '1_count_quant', '2_count_quant', '3_count_quant', '4_count_quant'],
+#              ['cust'],
+#              ['1.cust == cust and 1.quant > 0_avg_quant', '2.cust == cust and 2.quant > 1_avg_quant',
+#                  '3.cust == cust and 3.quant > 2_avg_quant', '4.cust == cust and 4.quant > 3_avg_quant'],
+#              [''],
+#              {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
+#                  '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
+#              None,
+#              None,
+#              "",
+#              2,
+#              [('1_avg_quant', 'avg', 'quant'), ('1_count_quant', 'count', 'quant')],
+#              1
+# ))
 
 
 def writeProject(S, G, script, space):
@@ -219,6 +218,8 @@ def writeProject(S, G, script, space):
     output += ((" "*space)+"row_str = row_str[:-1]\n")
     output += ((" "*space)+"x.add_row(row_str.split(','))\n")
     space -= 2
+    if len(G) and len(G[0]):
+        space-=2
     output += ((" "*space)+"print(x)\n")
     script += output
     return script
