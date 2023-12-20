@@ -1,0 +1,8 @@
+with t1 as(
+	select cust, prod, max(quant) max_quant
+	from sales
+	group by cust, prod
+)
+select s.cust, s.prod, s.quant,s.date
+from sales s, t1
+where s.cust = t1.cust and s.prod = t1.prod and s.quant = t1.max_quant

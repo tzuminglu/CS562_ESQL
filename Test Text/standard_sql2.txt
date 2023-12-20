@@ -1,0 +1,21 @@
+with t1 as(
+	select cust, avg(quant) ny_avg
+	from sales
+	where state = 'NY'
+	group by cust
+), 
+t2 as(
+	select cust, avg(quant) nj_avg
+	from sales
+	where state = 'NJ'
+	group by cust
+),
+t3 as(
+	select cust, avg(quant) ct_avg
+	from sales
+	where state = 'CT'
+	group by cust
+)
+select t1.cust, t1.ny_avg, t2.nj_avg, t3.ct_avg
+from t1, t2, t3
+where t1.cust = t2.cust and t1.cust = t3.cust
