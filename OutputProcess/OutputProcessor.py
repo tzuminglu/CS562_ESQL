@@ -200,29 +200,37 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
 def writeProject(S, G, script, space):
     my_string = ','.join(f"'{item}'" for item in S)
     output = ""
-    output += ((" "*space)+"x = PrettyTable()\n")
-    output += ((" "*space)+f"x.field_names = ["+my_string+"]\n")
-    output += ((" "*space)+"for val in group.values():\n")
+    output += ((" " * space) + "x = PrettyTable()\n")
+    output += ((" " * space) + f"x.field_names = [" + my_string + "]\n")
+    output += ((" " * space) + "for val in group.values():\n")
     space += 2
     if len(G) and len(G[0]):
         having = processHaving(G[0])
         output += ((" " * space) + "if " + having + ":\n")
         space += 2
-    output += ((" "*space)+"row_str=''\n")
-    output += ((" "*space)+"for key in val:\n")
+    output += ((" " * space) + "row_str=''\n")
+    output += ((" " * space) + "for key in val:\n")
     space += 2
-    output += ((" "*space)+"if key in x.field_names:\n")
+    output += ((" " * space) + "if key in x.field_names:\n")
     space += 2
-    output += ((" "*space)+"row_str+=str(val[key])+','\n")
-    space -= 4
-    output += ((" "*space)+"row_str = row_str[:-1]\n")
-    output += ((" "*space)+"x.add_row(row_str.split(','))\n")
+    # Check if key contains 'avg' and if so, round the value to two decimal places
+    output += ((" " * space) + "if 'avg' in key and isinstance(val[key], (int, float)):\n")
+    space += 2
+    output += ((" " * space) + "row_str += str(round(val[key], 2)) + ','\n")
+    space -= 2
+    output += ((" " * space) + "else:\n")
+    space += 2
+    output += ((" " * space) + "row_str += str(val[key]) + ','\n")
+    space -= 6
+    output += ((" " * space) + "row_str = row_str[:-1]\n")
+    output += ((" " * space) + "x.add_row(row_str.split(','))\n")
     space -= 2
     if len(G) and len(G[0]):
-        space-=2
-    output += ((" "*space)+"print(x)\n")
+        space -= 2
+    output += ((" " * space) + "print(x)\n")
     script += output
     return script
+
 # print(firstScan(['cust', 'prod'],
 #     {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': ['3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
 #     "",
