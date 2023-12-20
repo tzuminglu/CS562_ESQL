@@ -79,7 +79,7 @@ def firstScan(V, schema, structure, indentation, group_variable_fs):
                                           None, None, indentation, None)
             elif f[1] == "min":
                 structure += minStructure(group_attr,
-                                          f[0], None, indentation, None)
+                                          f[0],None, None, indentation, None)
             elif f[1] == "count":
                 structure += countStructure(group_attr, f[0], indentation, None)
             elif f[1] == "sum":
