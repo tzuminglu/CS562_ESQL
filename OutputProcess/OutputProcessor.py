@@ -23,7 +23,7 @@ def outputMFStructure(structure, space):
     return output
 
 
-def firstScan(V, schema, structure, space, group_variable_fs):
+def firstScan(V, schema, structure, space, aggregate_set):
     """
     The function generates the script for the initial scan. 
     This scan populates the hashmap with grouping attributes and computes the aggregation function for grouping variable 0. 
@@ -32,10 +32,10 @@ def firstScan(V, schema, structure, space, group_variable_fs):
 
     group_attr = "(" + ", ".join(["key_" +
                                   group_attr for group_attr in V]) + ")"
-    print(f"group_variable_fs with first scan: {group_variable_fs}")
+    print(f"group_variable_fs with first scan: {aggregate_set}")
 
-    if 0 in group_variable_fs.keys():
-        gv0 = [(f[0], f[1], f[2])for f in group_variable_fs[0]]
+    if 0 in aggregate_set.keys():
+        gv0 = [(f[0], f[1], f[2])for f in aggregate_set[0]]
         for f in gv0:
             if "avg" in f[1]:
                 structure += ((" " * space) + "count_" +
@@ -50,7 +50,7 @@ def firstScan(V, schema, structure, space, group_variable_fs):
                       " = row[" + schema[attr][0] + "]\n")
 
     """Extract aggregated attributes (ex: quant)"""
-    if 0 in group_variable_fs.keys():
+    if 0 in aggregate_set.keys():
         fun_attr_set = set(f[2] for f in gv0)
         for attr in fun_attr_set:
             structure += ((" " * space) + attr +
@@ -69,7 +69,7 @@ def firstScan(V, schema, structure, space, group_variable_fs):
     """
     Writing the aggregation function into the script.    
     """
-    if 0 in group_variable_fs.keys():
+    if 0 in aggregate_set.keys():
         for f in gv0:
             if f[1] == "avg":
                 structure += avgStructure(group_attr, f[0],
@@ -87,18 +87,18 @@ def firstScan(V, schema, structure, space, group_variable_fs):
 
     return structure
 
-def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structure, space, group_variable_fs, index):
+def GVScan(S, V, C, G, schema, max_aggregate, min_aggregate, structure, space, aggregate_set, index):
 
     key_V = [f"key_{group_attr}" for group_attr in V]
     group_attr = "(" + ", ".join(key_V) + ")"
     process_attr = processAttr1(S, C, G)
 
-    if not group_variable_fs:
+    if not aggregate_set:
         group_variables_to_be_scan = {}
-        group_variable_fs = {}
+        aggregate_set = {}
     else:
         group_variables_to_be_scan = {
-            index: [value[0] for value in group_variable_fs]}
+            index: [value[0] for value in aggregate_set]}
     for i, condition in enumerate(C):
         if group_variables_to_be_scan.get(i + 1):
             group_variables_to_be_scan[i +
@@ -108,7 +108,7 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
     Construct a dictionary to represent group variables for the scan.
     """
     structure += (" " * space) + f"# {index+1} scan\n"
-    for value in group_variable_fs:
+    for value in aggregate_set:
         if "avg" in value[1]:
             structure += (" " * space) + \
                 f"count_{value[0]} = collections.defaultdict(int)\n"
@@ -154,10 +154,10 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
                                               space, condition) + f"\n"
                 elif agg[1] == "max":
                     structure += maxStructure(
-                        group_attr, value, max_aggregate_attrs[index], index, space, condition)
+                        group_attr, value, max_aggregate[index], index, space, condition)
                 elif agg[1] == "min":
                     structure += minStructure(
-                        group_attr, value, min_aggregate_attrs[index], index, space, condition)
+                        group_attr, value, min_aggregate[index], index, space, condition)
                 elif agg[1] == "count":
                     structure += countStructure(group_attr,
                                                 value, space, condition) + f"\n"

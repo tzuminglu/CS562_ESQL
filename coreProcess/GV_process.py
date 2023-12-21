@@ -80,9 +80,9 @@ def processHaving(havings):
 def processAttr1(S, C, G):
     attrs = {}
     operators = ["==", "<=", ">=", "<", ">", "!="]
-    group_variable_attrs = {}
-    group_variable_attrs_max_aggregate = {}
-    group_variable_attrs_min_aggregate = {}
+    group_variable = {}
+    max_aggregate = {}
+    min_aggregate = {}
 
     for s in S:
         if "." in s:
@@ -101,7 +101,7 @@ def processAttr1(S, C, G):
                 number = int(statement[0].split(".")[0])
                 right = statement[1]
                 if "max" in right or "min" in right:
-                    group_variable_attrs[number] = attrs.get(number, [])
+                    group_variable[number] = attrs.get(number, [])
 
     for g in G:
         array = g.split(" and ")
@@ -113,15 +113,15 @@ def processAttr1(S, C, G):
                     number = int(statement[0].split(".")[0])
                     right = statement[1]
                     if "max" in right:
-                        group_variable_attrs_max_aggregate[number] = attrs.get(
+                        max_aggregate[number] = attrs.get(
                             number, [])
-                        group_variable_attrs[number] = attrs.get(number, [])
+                        group_variable[number] = attrs.get(number, [])
                     if "min" in right:
-                        group_variable_attrs_min_aggregate[number] = attrs.get(
+                        min_aggregate[number] = attrs.get(
                             number, [])
-                        group_variable_attrs[number] = attrs.get(number, [])
+                        group_variable[number] = attrs.get(number, [])
 
-    return group_variable_attrs, group_variable_attrs_max_aggregate, group_variable_attrs_min_aggregate
+    return group_variable, max_aggregate, min_aggregate
 
 
 # print(f"{processAgg(F)}\n")

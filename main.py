@@ -40,16 +40,16 @@ def connect():
     script += outputQueryTable(table_name, space)
     script += outputMFStructure(mf, space)
     aggregate_set = processAgg(F)
-    group_variable_attrs, group_variable_max, group_variable_min = processAttr1(
+    group_variable_attrs, max_aggregate, min_aggregate = processAttr1(
         S, C, G)
-    print(f"group_variable_min:{group_variable_min}")
+    print(f"group_variable_min:{min_aggregate}")
     script += ("\n" + (" " * space) + "## 1th Scan:\n")
     script = firstScan(V, schema, script, space, aggregate_set)
     script += ("\n" + (" " * space) + "## GV Scan:\n")
     for i in range(1,int(N[0])+1):
         print(aggregate_set)
         print(set)
-        script = GVScan(S, V, C, G, schema, group_variable_max,group_variable_min, script, space, aggregate_set.get(i), i)
+        script = GVScan(S, V, C, G, schema, max_aggregate,min_aggregate, script, space, aggregate_set.get(i), i)
     script = writeProject(S, G, script, space)
     print(script)
 

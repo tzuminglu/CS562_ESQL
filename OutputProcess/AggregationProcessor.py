@@ -25,7 +25,7 @@ def avgStructure(attrs, func, group_variable, space, condition):
 
     return avg
 
-def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, condition):
+def maxStructure(attrs, func, max_aggregate, index, space, condition):
 
     structure = ""
     group_key = f'group[{attrs}]["{func}"]'
@@ -40,8 +40,8 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, 
     space += 2
     structure += (" " * space) + f'{group_key} = {target}\n'
 
-    if group_variable_attrs_max_aggregate:
-        for attr in group_variable_attrs_max_aggregate:
+    if max_aggregate:
+        for attr in max_aggregate:
             if not index:
                 structure += (" " * space) + \
                 f'{group_attr_key} = {attr.split(".")[1]}\n'
@@ -57,8 +57,8 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, 
     space += 2
     structure += (" " * space) + f'{group_key} = {target}\n'
 
-    if group_variable_attrs_max_aggregate:
-        for attr in group_variable_attrs_max_aggregate:
+    if max_aggregate:
+        for attr in max_aggregate:
             if not index:
                 structure += (" " * space) + \
                 f'{group_attr_key} = {attr.split(".")[1]}\n'
@@ -69,10 +69,10 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, 
     return structure
 
 
-def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, space, condition):
+def minStructure(attrs, func, min_aggregate, index, space, condition):
     structure = ""
     group_key = f'group[{attrs}]["{func}"]'
-    print(f"group_variable_attrs_min_aggregate:{group_variable_attrs_min_aggregate}")
+    print(f"group_variable_attrs_min_aggregate:{min_aggregate}")
     target=func
     if '_' in func:
         target=func.split('_')[2]
@@ -84,8 +84,8 @@ def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, space, 
     space += 2
     structure += (" " * space) + f'{group_key} = {target}\n'
 
-    if group_variable_attrs_min_aggregate:
-        for attr in group_variable_attrs_min_aggregate:
+    if min_aggregate:
+        for attr in min_aggregate:
             if not index:
                 structure += (" " * space) + \
                 f'{group_attr_key} = {attr.split(".")[1]}\n'
@@ -101,8 +101,8 @@ def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, space, 
     space += 2
     structure += (" " * space) + f'{group_key} = {target}\n'
 
-    if group_variable_attrs_min_aggregate:
-        for attr in group_variable_attrs_min_aggregate:
+    if min_aggregate:
+        for attr in min_aggregate:
             if not index:
                 structure += (" " * space) + \
                 f'{group_attr_key} = {attr.split(".")[1]}\n'
