@@ -6,3 +6,4 @@ with t1 as(
 select s.cust, s.prod, s.quant,s.date
 from sales s, t1
 where s.cust = t1.cust and s.prod = t1.prod and s.quant = t1.max_quant
+having s.quant >= 1000
