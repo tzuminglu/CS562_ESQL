@@ -1,0 +1,17 @@
+with t1 as (
+	select x.prod, x.month, avg(y.quant) before_avg
+	from sales x, sales y
+	where x.prod = y.prod and x.month > y.month
+	group by x.prod, x.month
+),
+t2 as (
+	select x.prod, x.month, avg(y.quant) after_avg
+	from sales x, sales y
+	where x.prod = y.prod and x.month < y.month
+	group by x.prod, x.month
+
+)
+select t1.prod, t1.month, t1.before_avg, t2.after_avg
+from t1
+outer join t2
+on t1.prod = t2.prod and t1.month = t2.month

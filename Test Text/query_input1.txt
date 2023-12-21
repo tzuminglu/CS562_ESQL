@@ -1,12 +1,11 @@
 SELECT ATTRIBUTE(S):
-cust, 0_avg_quant, 1_avg_quant, 2_avg_quant, 3_count_quant
+cust, prod, 1.quant, 1.date
 NUMBER OF GROUPING VARIABLES(n):
-3
+1
 GROUPING ATTRIBUTES(V):
-cust
+cust, prod
 F-VECT([F]):
-0_avg_quant, 1_avg_quant, 2_avg_quant, 3_count_quant
+0_max_quant
 SELECT CONDITION-VECT([σ]):
-1.cust == cust and 1.quant > 0_avg_quant, 2.cust == cust and 2.quant > 0_avg_quant and 2.state == "NY", 3.cust == cust and 3.state == "NY" and 3.quant > 1_avg_quant
+1.cust == cust and 1.prod == prod and 1.quant == 0_max_quant
 HAVING_CONDITION(G):
-3_count_quant > 65

@@ -25,7 +25,7 @@ def connect():
     )
     cursor = conn.cursor()
 
-    with open(r"./Test Text/query_input1.txt") as my_file:
+    with open(r"./Test Text/query_input3.txt") as my_file:
         file = my_file.read()
     input = input_parser(file)
     schema = {'cust': '0', 'prod': '1', 'day': '2', 'month': '3',
