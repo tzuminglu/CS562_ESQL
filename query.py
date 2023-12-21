@@ -35,6 +35,7 @@ def query():
         group[(key_cust)]['0_avg_quant'] += ((quant - group[(key_cust)]['0_avg_quant'])/count_0_avg_quant[(key_cust)])
 
     ## GV Scan:
+    # 2 scan
     count_1_avg_quant = collections.defaultdict(int)
     for (key_cust) in group:
       for row in rows:
@@ -54,6 +55,7 @@ def query():
             count_1_avg_quant[(key_cust)] += 1
             group[(key_cust)]['1_avg_quant'] += ((quant - group[(key_cust)]['1_avg_quant'])/count_1_avg_quant[(key_cust)])
 
+    # 3 scan
     count_2_avg_quant = collections.defaultdict(int)
     for (key_cust) in group:
       for row in rows:
@@ -73,6 +75,7 @@ def query():
             count_2_avg_quant[(key_cust)] += 1
             group[(key_cust)]['2_avg_quant'] += ((quant - group[(key_cust)]['2_avg_quant'])/count_2_avg_quant[(key_cust)])
 
+    # 4 scan
     for (key_cust) in group:
       for row in rows:
         cust = row[0]

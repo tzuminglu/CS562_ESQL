@@ -4,7 +4,6 @@ import collections
 import pathlib
 from OutputProcess.OutputProcessor import *
 from InputProcess.InputParser import *
-
 from coreProcess.GV_process import *
 from coreProcess.mf_Structure import *
 

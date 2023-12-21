@@ -1,12 +1,11 @@
 
+from coreProcess.GV_process import *
+from OutputProcess.AggregationProcessor import *
 import sys
 sys.path.append('../')
-from OutputProcess.AggregationProcessor import *
-from coreProcess.GV_process import *
-
-# this function is to fecth data from the query table
 
 
+# This function retrieves data from the specified query table.
 def outputQueryTable(table_name, space):
     output = ("\n" + (" " * space) +
               f"query = 'select * from {table_name}'\n")
@@ -25,11 +24,11 @@ def outputMFStructure(structure, space):
 
 
 def firstScan(V, schema, structure, space, group_variable_fs):
-    """The function to write the script of first initial scan"""
-
-    # the function writes the script of the first scan, the first scan fill grouping attribute into the hashmap
-    # and process the aggregation function of the grouping variable 0
-    # group_variable_fs: {0: [('0_max_quant', 'max', 'quant')]}
+    """
+    The function generates the script for the initial scan. 
+    This scan populates the hashmap with grouping attributes and computes the aggregation function for grouping variable 0. 
+    Example: group_variable_fs: {0: [('0_max_quant', 'max', 'quant')]}.
+    """
 
     group_attr = "(" + ", ".join(["key_" +
                                   group_attr for group_attr in V]) + ")"
@@ -45,19 +44,19 @@ def firstScan(V, schema, structure, space, group_variable_fs):
     structure += ((" " * space) + "for row in rows:\n")
     space += 2
 
-    # extract grouping attributes (ex: cust, prod)
+    """Extracting grouping attributes such as 'cust' and 'prod'."""
     for attr in V:
         structure += ((" " * space) + "key_" + attr +
                       " = row[" + schema[attr][0] + "]\n")
 
-    # extract aggregated attributes (ex: quant)
+    """Extract aggregated attributes (ex: quant)"""
     if 0 in group_variable_fs.keys():
         fun_attr_set = set(f[2] for f in gv0)
         for attr in fun_attr_set:
             structure += ((" " * space) + attr +
                           " = row[" + schema[attr][0] + "]\n")
 
-    # first filling the grouping attributes, this process only works in first scan
+    """Wrtie first scan in the script"""
     group_key = "group[" + group_attr + "]"
     structure += ((" " * space) + "if not " + "(" +
                   " and ".join([group_key + "[\"" + attr + "\"]" for attr in V]) + "):\n")
@@ -67,19 +66,20 @@ def firstScan(V, schema, structure, space, group_variable_fs):
                       '["' + v + '"]' + " = key_" + v + "\n")
     space -= 2
 
+    """
+    Writing the aggregation function into the script.    
+    """
     if 0 in group_variable_fs.keys():
         for f in gv0:
-            print("this is f")
-            print(f)
             if f[1] == "avg":
                 structure += avgStructure(group_attr, f[0],
                                           "0", space, None)
             elif f[1] == "max":
-                structure += maxStructure(group_attr,f[0],
+                structure += maxStructure(group_attr, f[0],
                                           None, None, space, None)
             elif f[1] == "min":
                 structure += minStructure(group_attr,
-                                          f[0],None, None, space, None)
+                                          f[0], None, None, space, None)
             elif f[1] == "count":
                 structure += countStructure(group_attr, f[0], space, None)
             elif f[1] == "sum":
@@ -87,76 +87,63 @@ def firstScan(V, schema, structure, space, group_variable_fs):
 
     return structure
 
-
-# print(firstScan(['cust', 'prod'], {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
-#     '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']}, "", 0, {0: [('0_max_quant', 'max', 'quant')], 1: [('1_avg_quant', 'avg', 'quant')], 2: [('2_avg_quant', 'avg', 'quant')], 3: [('3_avg_quant', 'avg', 'quant')]}))
-
 def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structure, space, group_variable_fs, index):
 
     key_V = [f"key_{group_attr}" for group_attr in V]
     group_attr = "(" + ", ".join(key_V) + ")"
-    print(f'group_variable_fs: {group_variable_fs}')
-    # print(f'group_attr: {group_attr}')
     process_attr = processAttr1(S, C, G)
-    # print(f"process_attr: {processAttr1(S, C, G)}")
-    
+
     if not group_variable_fs:
         group_variables_to_be_scan = {}
-        group_variable_fs={}
+        group_variable_fs = {}
     else:
         group_variables_to_be_scan = {
             index: [value[0] for value in group_variable_fs]}
-    # print(f"group_variables_to_be_scan: {group_variables_to_be_scan}")
     for i, condition in enumerate(C):
         if group_variables_to_be_scan.get(i + 1):
             group_variables_to_be_scan[i +
                                        1] = group_variables_to_be_scan[i + 1] + [condition]
-            # print(f"index: {i} condition: {condition}")
-            # print(group_variables_to_be_scan)
-    # print(group_variables_to_be_scan)
-    # processed_condition = processSuchthat(C[0], group_attr)
-    # print(f"\nprocessed_condition: {processed_condition}")
-    print(f"\ngroup_variables_to_be_scan: {group_variables_to_be_scan}")
-
-    # {0: [('0_max_quant', 'max', 'quant')], 1: [('1_avg_quant', 'avg', 'quant')], 2: [('2_avg_quant', 'avg', 'quant')], 3: [('3_avg_quant', 'avg', 'quant')]}
-
-    # for group_variable in next_scan:
+    """
+    {0: [('0_max_quant', 'max', 'quant')], 1: [('1_avg_quant', 'avg', 'quant')], 2: [('2_avg_quant', 'avg', 'quant')], 3: [('3_avg_quant', 'avg', 'quant')]}
+    Construct a dictionary to represent group variables for the scan.
+    """
+    structure += (" " * space) + f"# {index+1} scan\n"
     for value in group_variable_fs:
-        print(f'\n{value}')
         if "avg" in value[1]:
             structure += (" " * space) + \
                 f"count_{value[0]} = collections.defaultdict(int)\n"
-        print(structure)
+            
     structure += (" " * space) + f"for {group_attr} in group:\n"
     space += 2
     structure += (" " * space) + "for row in rows:\n"
     space += 2
     for attr in schema:
         structure += (" " * space) + f"{attr} = row[{schema[attr][0]}]\n"
-    # print(structure)
     output_data = {}
-    print(f"process_attr: {process_attr}")
+
     # S
+    """
+    This loop processes group variables specified in the select statement, for example, select 1.state, 1.quant
+    """
     for attr in process_attr:
         for index, value in attr.items():
             output_data[index] = {'value': value, 'condition': processSuchthat(
                 C[index-1], group_attr) if C[index-1] else []}
             output_data[index]['value'] = [
                 f"{index}.{attr}" for attr in output_data[index]['value']]
-            # structure += noAggregate(group_attr, output_data[index].value, indentation, output_data[index].condition)
-            print(output_data[index])
             structure += f"{' ' * space}if {output_data[index]['condition']}:\n"
             space += 2
             for value in output_data[index]['value']:
                 structure += f'{" " * space}group[{group_attr}]["{value}"] = {value.split(".")[1]} \n'
             space -= 2
-    print(output_data)
 
     # F
+    """
+    This loop handles group variables defined in the Aggregate function statement, such as 0_avg_quant and 1_avg_quant.
+    """
     for index, values in group_variables_to_be_scan.items():
         for value in values[:-1]:
             agg = value.split("_")
-            print(f"index: {index}, value: {value}")
             condition = processSuchthat(C[index-1], group_attr)
             if not agg[1]:
                 structure += noAggregate(
@@ -164,37 +151,21 @@ def GVScan(S, V, C, G, schema, max_aggregate_attrs, min_aggregate_attrs, structu
             else:
                 if agg[1] == "avg":
                     structure += avgStructure(group_attr, value, str(index),
-                                          space, condition) + f"\n"
+                                              space, condition) + f"\n"
                 elif agg[1] == "max":
                     structure += maxStructure(
                         group_attr, value, max_aggregate_attrs[index], index, space, condition)
                 elif agg[1] == "min":
                     structure += minStructure(
-                    group_attr, value, min_aggregate_attrs[index], index, space, condition)
+                        group_attr, value, min_aggregate_attrs[index], index, space, condition)
                 elif agg[1] == "count":
                     structure += countStructure(group_attr,
-                                            value, space, condition) + f"\n"
+                                                value, space, condition) + f"\n"
                 elif agg[1] == "sum":
                     structure += sumStructure(group_attr,
-                                          value, space, condition) + f"\n"
+                                              value, space, condition) + f"\n"
 
     return structure
-
-
-# print(GVScan(['cust', '1_count_quant', '2_count_quant', '3_count_quant', '4_count_quant'],
-#              ['cust'],
-#              ['1.cust == cust and 1.quant > 0_avg_quant', '2.cust == cust and 2.quant > 1_avg_quant',
-#                  '3.cust == cust and 3.quant > 2_avg_quant', '4.cust == cust and 4.quant > 3_avg_quant'],
-#              [''],
-#              {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
-#                  '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
-#              None,
-#              None,
-#              "",
-#              2,
-#              [('1_avg_quant', 'avg', 'quant'), ('1_count_quant', 'count', 'quant')],
-#              1
-# ))
 
 
 def writeProject(S, G, script, space):
@@ -219,69 +190,7 @@ def writeProject(S, G, script, space):
     output += ((" "*space)+"x.add_row(row_str.split(','))\n")
     space -= 2
     if len(G) and len(G[0]):
-        space-=2
+        space -= 2
     output += ((" "*space)+"print(x)\n")
     script += output
     return script
-# print(firstScan(['cust', 'prod'],
-#     {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': ['3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
-#     "",
-#     0,
-#     {0: [('0_max_quant', 'max', 'quant')], 1: [('1_avg_quant', 'avg', 'quant')], 2: [('2_avg_quant', 'avg', 'quant')], 3: [('3_avg_quant', 'avg', 'quant')]}))
-
-# print(f"Script 5")
-# print(GVScan(['cust', '1_avg_quant', '2_avg_quant', '3_avg_quant'],
-#              ['cust'],
-#              ['1.cust == cust and 1.state == "NY"', '2.cust == cust and 2.state == "NJ"',
-#                  '3.cust == cust and 3.state == "CT"'],
-#              [''],
-#              {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
-#                  '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
-#                  None,
-#              "",
-#              2,
-#              {1: [('1_avg_quant', 'avg', 'quant')], 2: [
-#                  ('2_avg_quant', 'avg', 'quant')], 3: [('3_avg_quant', 'avg', 'quant')]}
-#              ))
-
-
-# print("\nScript 2")
-# print(GVScan(['cust', 'prod', '1.quant', '1.state', '1.date'],
-#             ['cust', 'prod'],
-#            ['1.cust == cust and 1.prod == prod and 1.quant == 0_max_quant'],
- #            [''],
- #            {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
- #                '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
- #            None,
-  #           None,
-  #           "",
-  #           2,
-  #           {0: [('0_max_quant', 'max', 'quant')]}
-  #           ))
-
-# print(GVScan(['cust', 'prod', '0_avg_quant', '1_avg_quant', '2_avg_quant'],
-#              ['cust', 'prod'],
-#              ['1.cust == cust and 1.prod == prod and 1.year == 2018 and 1.quant > 0_avg_quant', '2.cust == cust and 2.prod == prod and 2.year == 2019 and 2.quant > 1_avg_quant'],
-#              [''],
-#              {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
-#                  '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
-#             None,
-#             "",
-#             2,
-#             {0: [('0_avg_quant', 'avg', 'quant')], 1: [('1_avg_quant', 'avg', 'quant')], 2: [('2_avg_quant', 'avg', 'quant')]}
-#              ))]
-
-# rint("Script 3\n")
-# print(GVScan(['cust', 'prod', '1.quant', '1.state', '1.date'],
-#            ['cust', 'prod'],
-#            ['1.cust == cust and 1.prod == prod and 1.date > 2019-05-31 and 1.date < 2019-09-01'],
- #            ['1_sum_quant * 10 > 0_sum_quant and 1.quant == 1_min_quant and 1_min_quant > 150'],
- #            {'cust': ['0', 'character varying'], 'prod': ['1', 'character varying'], 'day': ['2', 'integer'], 'month': [
- #                '3', 'integer'], 'year': ['4', 'integer'], 'state': ['5', 'character'], 'quant': ['6', 'integer'], 'date': ['7', 'date']},
- #            None,
- #            {1: ['1.quant', '1.state', '1.date']},
- #            "",
- #            2,
-#             {0: [('0_sum_quant', 'sum', 'quant')], 1: [
- #                ('1_min_quant', 'min', 'quant'), ('1_sum_quant', 'sum', 'quant')]}
- #            ))

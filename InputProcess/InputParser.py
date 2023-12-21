@@ -1,9 +1,9 @@
-# using queue to perform the input parser
+# Using queue to perform the input parser
 from collections import deque
 
 def input_parser(file):
 
-    # create a function dictionary for storing the corresponded values
+    # Apply a dictionary for storing the values
     function_dict = {}
     function_type = ["SELECT ATTRIBUTE(S):",
                      "NUMBER OF GROUPING VARIABLES(n):",
@@ -15,7 +15,7 @@ def input_parser(file):
         if key not in function_dict:
             function_dict[key] = list()
 
-    # using split to convert text file into a list in order to put the value into corresponded values
+    # Use the split method to transform a text file into a list.
     file_list = deque(file.split("\n"))
     while file_list:
         first_pop_text = file_list.popleft()
@@ -25,15 +25,8 @@ def input_parser(file):
         else:
             raise (ValueError(f"{first_pop_text} doesn't exist"))
 
-    # split the value by using comma and convert the value from string to list
+    # Split the value using a comma and convert it from a string to a list.
     for key, value in function_dict.items():
         value = value.split(", ")
         function_dict[key] = value
     return function_dict
-
-
-# file = None
-# with open("../Test Text/query_input1.txt") as my_file:
-#     file = my_file.read()
-# print(file)
-# print(input_parser(file))

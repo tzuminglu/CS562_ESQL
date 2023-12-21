@@ -5,7 +5,6 @@ def avgStructure(attrs, func, group_variable, space, condition):
     if '_' in func:
         target=func.split('_')[2]
     group_key = f"group[{attrs}]['{func}']"
-    # group_key = "group[" + group_variable + ']["'  + func[0] + '"]'
     count_key = "count_"  + func + "[" + attrs + "]"
     print(f"count_key: {count_key}")
 
@@ -25,9 +24,6 @@ def avgStructure(attrs, func, group_variable, space, condition):
     avg += ((" " * space) + group_key + " += ((" + target  + " - " + group_key + ")/" + count_key + ")\n")
 
     return avg
-# print(avgStructure("(key_cust)",
-#       ('0_avg_quant', 'avg', 'quant'), "0", 6, 'group[(key_cust)]["cust"] == cust and quant > group[(key_cust)]["0_avg_quant"]'))
-
 
 def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, condition):
 
@@ -71,7 +67,6 @@ def maxStructure(attrs, func, group_variable_attrs_max_aggregate, index, space, 
                 structure += (" " * space) + \
                     f'{group_attr_key} = {attr}\n'
     return structure
-# print(maxStructure("(key_cust)", ('0_max_quant', 'max', 'quant'), None, 6, None))
 
 
 def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, space, condition):
@@ -117,7 +112,6 @@ def minStructure(attrs, func, group_variable_attrs_min_aggregate, index, space, 
                     f'{group_attr_key} = {attr}\n'
 
     return structure
-# print(minStructure("(key_cust)", ('0_min_quant', 'min', 'quant'), None, 6, None))
 
 
 def countStructure(attrs, func, space, condition):
@@ -140,7 +134,6 @@ def countStructure(attrs, func, space, condition):
     structure += (" " * space) + f'{group_key} += 1\n'
 
     return structure
-# print(countStructure("(key_cust)", ('0_count_quant', 'count', 'quant'), 6, None))
 
 
 def sumStructure(attrs, func, space, condition):
@@ -163,8 +156,6 @@ def sumStructure(attrs, func, space, condition):
     structure += (" " * space) + f"{group_key} += {target}\n"
 
     return structure
-
-# print(sumScript("(key_cust)", ('0_sum_quant', 'sum', 'quant'), 6, None))
 
 
 def noAggregate(group_attr, attrs, space, condition):
