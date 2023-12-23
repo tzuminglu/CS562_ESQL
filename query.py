@@ -17,21 +17,26 @@ def query():
     query = 'select * from sales'
     cursor.execute(query)
     rows = cursor.fetchall()
-    mf_structure = {'prod': None, 'month': None, '1_avg_quant': None, '2_avg_quant': None}
+    mf_structure = {'cust': None, 'prod': None, '1.quant': None, '1.date': None, '0_max_quant': None}
     group = collections.defaultdict(lambda: dict(mf_structure))
 
     ## 1th Scan:
     for row in rows:
+      key_cust = row[0]
       key_prod = row[1]
-      key_month = row[3]
-      if not (group[(key_prod, key_month)]["prod"] and group[(key_prod, key_month)]["month"]):
-        group[(key_prod, key_month)]["prod"] = key_prod
-        group[(key_prod, key_month)]["month"] = key_month
+      quant = row[6]
+      if not (group[(key_cust, key_prod)]["cust"] and group[(key_cust, key_prod)]["prod"]):
+        group[(key_cust, key_prod)]["cust"] = key_cust
+        group[(key_cust, key_prod)]["prod"] = key_prod
+      if not group[(key_cust, key_prod)]["0_max_quant"]:
+        group[(key_cust, key_prod)]["0_max_quant"] = quant
+      else:
+        if quant > group[(key_cust, key_prod)]["0_max_quant"]:
+          group[(key_cust, key_prod)]["0_max_quant"] = quant
 
     ## GV Scan:
     # 2 scan
-    count_1_avg_quant = collections.defaultdict(int)
-    for (key_prod, key_month) in group:
+    for (key_cust, key_prod) in group:
       for row in rows:
         cust = row[0]
         prod = row[1]
@@ -41,46 +46,22 @@ def query():
         state = row[5]
         quant = row[6]
         date = row[7]
-        if prod==group[(key_prod, key_month)]["prod"] and month<group[(key_prod, key_month)]["month"]:
-          if not group[(key_prod, key_month)]['1_avg_quant']:
-            group[(key_prod, key_month)]['1_avg_quant'] = quant
-            count_1_avg_quant[(key_prod, key_month)] += 1
-          else:
-            count_1_avg_quant[(key_prod, key_month)] += 1
-            group[(key_prod, key_month)]['1_avg_quant'] += ((quant - group[(key_prod, key_month)]['1_avg_quant'])/count_1_avg_quant[(key_prod, key_month)])
-
-    # 3 scan
-    count_2_avg_quant = collections.defaultdict(int)
-    for (key_prod, key_month) in group:
-      for row in rows:
-        cust = row[0]
-        prod = row[1]
-        day = row[2]
-        month = row[3]
-        year = row[4]
-        state = row[5]
-        quant = row[6]
-        date = row[7]
-        if prod==group[(key_prod, key_month)]["prod"] and month>group[(key_prod, key_month)]["month"]:
-          if not group[(key_prod, key_month)]['2_avg_quant']:
-            group[(key_prod, key_month)]['2_avg_quant'] = quant
-            count_2_avg_quant[(key_prod, key_month)] += 1
-          else:
-            count_2_avg_quant[(key_prod, key_month)] += 1
-            group[(key_prod, key_month)]['2_avg_quant'] += ((quant - group[(key_prod, key_month)]['2_avg_quant'])/count_2_avg_quant[(key_prod, key_month)])
-
+        if cust==group[(key_cust, key_prod)]["cust"] and prod==group[(key_cust, key_prod)]["prod"] and quant==group[(key_cust, key_prod)]["0_max_quant"]:
+          group[(key_cust, key_prod)]["1.quant"] = quant 
+          group[(key_cust, key_prod)]["1.date"] = date 
     x = PrettyTable()
-    x.field_names = ['prod','month','1_avg_quant','2_avg_quant']
+    x.field_names = ['cust','prod','1.quant','1.date']
     for val in group.values():
-      row_str=''
-      for key in val:
-        if key in x.field_names:
-          if 'avg' in key and isinstance(val[key], (int, float)):
-            row_str += str(round(val[key], 2)) + ','
-          else:
-            row_str += str(val[key]) + ','
-      row_str = row_str[:-1]
-      x.add_row(row_str.split(','))
+      if val["0_max_quant"]>=1000:
+        row_str=''
+        for key in val:
+          if key in x.field_names:
+            if 'avg' in key and isinstance(val[key], (int, float)):
+              row_str += str(round(val[key], 2)) + ','
+            else:
+              row_str += str(val[key]) + ','
+        row_str = row_str[:-1]
+        x.add_row(row_str.split(','))
     print(x)
 if __name__ == "__main__":
   query()

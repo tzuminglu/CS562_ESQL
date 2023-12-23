@@ -9,8 +9,7 @@ from coreProcess.mf_Structure import *
 
 template_path = str(pathlib.Path(__file__).parent.resolve())
 
-
-def connect():
+def connect(file_name):
     space = 4
     template = open(template_path + '/Template/header.txt', mode='r')
     script = template.read() + "\n"
@@ -25,7 +24,7 @@ def connect():
     )
     cursor = conn.cursor()
 
-    with open(r"./Test Text/query_input3.txt") as my_file:
+    with open(f"./Test Text/{file_name}.txt", "r") as my_file:
         file = my_file.read()
     input = input_parser(file)
     schema = {'cust': '0', 'prod': '1', 'day': '2', 'month': '3',
@@ -64,4 +63,5 @@ def connect():
 
 
 if __name__ == '__main__':
-    connect()
+    file_name = input("Please enter a file name in test text file:")
+    connect(file_name)
